@@ -1,830 +1,313 @@
+import os, base64, random, time
 import streamlit as st
-import random
 
-# ============================================================
-# إعدادات الصفحة و SEO
-# ============================================================
+st.set_page_config(page_title="منصة التطوير الذاتي الشاملة", page_icon="🚀",
+                   layout="wide", initial_sidebar_state="collapsed")
 
-st.set_page_config(
-    page_title="منصة التطوير الذاتي الشاملة | تطوير الذات والدراسة والرياضة",
-    page_icon="🚀",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
+# ===================== إعدادات =====================
+MODEL = "claude-haiku-4-5-20251001"   # سريع ورخيص، غيّره لو تبي أقوى
+MAX_USER_MSGS = 40                    # حد الرسائل لكل زائر (يحميك من الفاتورة)
+BG_DIR = "backgrounds"                # ضع الصور هنا: home.jpg / fitness.jpg / habits.jpg / study.jpg / ai_chat.jpg
 
-# ============================================================
-# Google Search Console Verification
-# ============================================================
-# ملاحظة:
-# هذا هو كود التحقق الذي أعطاك Google.
-# Streamlit لا يضمن وضع meta داخل <head> الحقيقي،
-# لذلك لا نعتمد عليه وحده لإثبات الملكية.
-# ============================================================
+SYSTEM_PROMPT = """أنت مساعد «منصة التطوير الذاتي الشاملة» من تطوير عبد الله.
+تكلم بلهجة سعودية بيضاء ودودة وخفيفة، كأنك صديق، وبردود قصيرة ومفيدة (3-6 أسطر غالباً).
+أقسام المنصة: 🏋️ التحدي الرياضي (حساب السعرات BMR/TDEE والبروتين والماء حسب الهدف)،
+🚫 تحدي العادات (خطة لكسر عادة حسب المحفز)، 📚 التحدي الدراسي (نصائح لـ 11 تخصصاً)، 🤖 المساعد الذكي (أنت).
+ساعد في: اختيار التخصص، الدراسة، الرياضة والتغذية العامة، كسر العادات، التحفيز وتنظيم الوقت.
+وجّه المستخدم للقسم المناسب في المنصة عند الحاجة، ولا تخترع ميزات غير موجودة.
+لا تشخّص أمراضاً ولا تعطِ علاجات؛ في الحالات الصحية أو النفسية الجادة انصح بمراجعة مختص.
+إذا خرج السؤال عن التطوير الذاتي رد باختصار ثم أرجعه بلطف لمواضيع المنصة."""
 
-st.markdown("""
-<meta name="google-site-verification"
-content="3jWJEcIATiFLKYhOJwzN4jksYpA9Bvp2qlfsaOkFBpQ">
-""", unsafe_allow_html=True)
+QUICK = ["محتار في التخصص", "كيف أنزل وزني؟", "أبغى أكسر عادة السهر", "ذاكر بطريقة أفضل"]
 
-
-# ============================================================
-# تنسيق CSS احترافي
-# ============================================================
-
-st.markdown("""
-<style>
-
-.main {
-    background-color: #0d1117;
-    color: #adbac7;
-}
-
-div.stButton > button {
-    width: 100%;
-    border-radius: 12px;
-    height: 3.8em;
-    background-color: #238636;
-    color: white;
-    font-weight: bold;
-    border: none;
-    transition: 0.3s;
-}
-
-div.stButton > button:hover {
-    background-color: #2ea043;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(46,160,67,0.4);
-}
-
-.card {
-    padding: 25px;
-    border-radius: 20px;
-    background-color: #1c2128;
-    border: 1px solid #444c56;
-    text-align: center;
-    margin-bottom: 20px;
-    min-height: 240px;
-    transition: 0.3s;
-}
-
-.card:hover {
-    border-color: #539bf5;
-}
-
-.footer-text {
-    position: fixed;
-    bottom: 10px;
-    left: 15px;
-    color: #539bf5;
-    font-size: 14px;
-    font-weight: bold;
-}
-
-.advice-box {
-    padding: 15px;
-    border-right: 5px solid #539bf5;
-    background-color: #22272e;
-    border-radius: 5px;
-    margin: 10px 0;
-}
-
-.seo-section {
-    margin-top: 35px;
-    padding: 25px;
-    border-radius: 18px;
-    background-color: #161b22;
-    border: 1px solid #30363d;
-    text-align: center;
-}
-
-.seo-section h2 {
-    color: #539bf5;
-}
-
-.seo-section p {
-    color: #adbac7;
-    line-height: 1.9;
-}
-
-.brand-box {
-    margin-top: 25px;
-    padding: 18px;
-    border-radius: 15px;
-    background-color: #1c2128;
-    border: 1px solid #30363d;
-    text-align: center;
-}
-
-.brand-box span {
-    color: #539bf5;
-    font-weight: bold;
-}
-
-</style>
-""", unsafe_allow_html=True)
-
-
-# ============================================================
-# إدارة التنقل
-# ============================================================
-
-if 'current_page' not in st.session_state:
-    st.session_state.current_page = 'home'
-
-
-# ============================================================
-# دالة تفريغ المحادثة
-# ============================================================
-
+# ===================== حالة الجلسة =====================
 def reset_ai_messages():
-    st.session_state.ai_messages = [
-        {
-            "role": "assistant",
-            "content":
-            "يا هلا والله! أنا مساعدك في «منصة التطوير الذاتي الشاملة». "
-            "سولف معي براحتك، محتار بتخصص؟ تبي تنزل وزنك؟ "
-            "ولا تبي تكسر عادة سيئة؟ اعتبرني صديقك وفضفض لي، "
-            "وش شاغل بالك اليوم؟"
-        }
-    ]
+    st.session_state.ai_messages = [{"role": "assistant", "content":
+        "يا هلا والله! أنا مساعدك في «منصة التطوير الذاتي الشاملة» 👋 "
+        "محتار بتخصص؟ تبي تنزل وزنك؟ تبي تكسر عادة؟ فضفض لي وش شاغل بالك."}]
 
-
-# ============================================================
-# Session State
-# ============================================================
-
-if 'ai_messages' not in st.session_state:
+st.session_state.setdefault("current_page", "home")
+st.session_state.setdefault("nav", 0)
+if "ai_messages" not in st.session_state:
     reset_ai_messages()
 
-
-def navigate_to(page):
+def go(page):
     st.session_state.current_page = page
-
-
-# ============================================================
-# حقوق التطوير
-# ============================================================
-
-st.markdown(
-    '<div class="footer-text">حقوق التطوير محفوظة لـ عبد الله © 2026</div>',
-    unsafe_allow_html=True
-)
-
-
-# ============================================================
-# 1. الشاشة الرئيسية
-# ============================================================
-
-if st.session_state.current_page == 'home':
-
-    # العنوان الرئيسي المهم لمحركات البحث
-    st.markdown(
-        "<h1 style='text-align: center; color: #ffffff;'>"
-        "🚀 منصة التطوير الذاتي الشاملة"
-        "</h1>",
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        "<p style='text-align: center; color: #768390; font-size: 18px;'>"
-        "منصة ذكية لتطوير الذات وتحسين الحياة اليومية، "
-        "وتجمع بين الدراسة والرياضة وتغيير العادات والذكاء الاصطناعي."
-        "</p>",
-        unsafe_allow_html=True
-    )
-
-    st.write("---")
-
-    col1, col2 = st.columns(2)
-
-    # --------------------------------------------------------
-    # التحدي الرياضي
-    # --------------------------------------------------------
-
-    with col1:
-
-        st.markdown(
-            """
-            <div class="card">
-                <h2>🏋️ التحدي الرياضي</h2>
-                <p>
-                حساب السعرات ونظام نصائح بدنية متغيرة
-                لمساعدتك على تحسين لياقتك وصحتك.
-                </p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-        if st.button("دخول التحدي الرياضي", key="btn_fit"):
-            navigate_to('fitness')
-            st.rerun()
-
-        # ----------------------------------------------------
-        # تحدي العادات
-        # ----------------------------------------------------
-
-        st.markdown(
-            """
-            <div class="card">
-                <h2>🚫 تحدي العادات</h2>
-                <p>
-                استراتيجيات عملية ونفسية لمساعدتك
-                على تغيير العادات السلبية وبناء عادات أفضل.
-                </p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-        if st.button("دخول تحدي العادات", key="btn_habits"):
-            navigate_to('habits')
-            st.rerun()
-
-    # --------------------------------------------------------
-    # القسم الدراسي + الذكاء الاصطناعي
-    # --------------------------------------------------------
-
-    with col2:
-
-        st.markdown(
-            """
-            <div class="card">
-                <h2>📚 التحدي الدراسي</h2>
-                <p>
-                خطط ذكية ونصائح تخصصية لمسارات أكاديمية
-                متنوعة تساعدك على تطوير مستواك الدراسي.
-                </p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-        if st.button("دخول التحدي الدراسي", key="btn_study"):
-            navigate_to('study')
-            st.rerun()
-
-        st.markdown(
-            """
-            <div class="card">
-                <h2>🤖 منصة التطوير الذاتي الشاملة</h2>
-                <p>
-                مساعد ذكي عفوي يساعدك في فهم أقسام المنصة
-                والإجابة عن أسئلتك حول الدراسة والرياضة والعادات.
-                </p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-        if st.button("دخول الذكاء الاصطناعي", key="btn_ai"):
-            navigate_to('ai_chat')
-            st.rerun()
-
-    # ========================================================
-    # قسم تعريف المنصة أسفل الأقسام الأربعة
-    # ========================================================
-
-    st.markdown(
-        """
-        <div class="seo-section">
-
-            <h2>منصة التطوير الذاتي الشاملة</h2>
-
-            <p>
-            منصة التطوير الذاتي الشاملة هي منصة تفاعلية تساعدك
-            على تطوير نفسك في عدة جوانب من الحياة اليومية.
-            </p>
-
-            <p>
-            تحتوي المنصة على التحدي الرياضي، تحدي العادات،
-            التحدي الدراسي، ومساعد الذكاء الاصطناعي.
-            </p>
-
-            <p>
-            هدف المنصة هو مساعدتك على تطوير الذات،
-            تحسين العادات، تنظيم الدراسة، الاهتمام باللياقة،
-            والاستفادة من الأدوات الذكية بطريقة بسيطة وتفاعلية.
-            </p>
-
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    # --------------------------------------------------------
-    # اسم المنصة بشكل إضافي في نهاية الصفحة
-    # --------------------------------------------------------
-
-    st.markdown(
-        """
-        <div class="brand-box">
-            <span>منصة التطوير الذاتي الشاملة</span>
-            <br>
-            تطوير الذات • الدراسة • الرياضة • العادات • الذكاء الاصطناعي
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-
-# ============================================================
-# 2. صفحة التحدي الرياضي
-# ============================================================
-
-elif st.session_state.current_page == 'fitness':
-
-    st.title("🏋️ التحدي الرياضي الذكي")
-
-    if st.button("⬅️ العودة للرئيسية", key="back_fit"):
-        navigate_to('home')
-        st.rerun()
-
-    c1, c2 = st.columns([1, 1])
-
-    with c1:
-
-        st.subheader("🔢 بيانات الجسم")
-
-        weight = st.number_input(
-            "الوزن (كجم):",
-            30.0,
-            250.0,
-            75.0
-        )
-
-        height = st.number_input(
-            "الطول (سم):",
-            100.0,
-            250.0,
-            175.0
-        )
-
-        age = st.number_input(
-            "العمر:",
-            10,
-            90,
-            22
-        )
-
-    with c2:
-
-        st.subheader("⚡ مستوى النشاط")
-
-        activity = st.radio(
-            "نشاطك الأسبوعي:",
-            [
-                "خامل جداً",
-                "تمارين خفيفة (1-2 يوم)",
-                "نشاط متوسط (3-4 أيام)",
-                "نشاط مكثف (5-6 أيام)",
-                "محترف/بطل رياضي"
-            ]
-        )
-
-        goal = st.selectbox(
-            "هدفك الحالي:",
-            [
-                "تنشيف (خسارة دهون)",
-                "تضخيم (بناء عضل)",
-                "لياقة عامة"
-            ]
-        )
-
-    if st.button("📊 توليد التقرير البدني والنصائح"):
-
-        bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5
-
-        acts = {
-            "خامل جداً": 1.2,
-            "تمارين خفيفة (1-2 يوم)": 1.375,
-            "نشاط متوسط (3-4 أيام)": 1.55,
-            "نشاط مكثف (5-6 أيام)": 1.725,
-            "محترف/بطل رياضي": 1.9
-        }
-
-        tdee = bmr * acts[activity]
-
-        calories = (
-            tdee - 500
-            if "خسارة" in goal
-            else tdee + 400
-            if "بناء" in goal
-            else tdee
-        )
-
-        st.success(
-            f"سعرات المحافظة: {int(tdee)} سعرة. "
-            f"احتياجك لهدفك: {int(calories)} سعرة."
-        )
-
-        st.markdown("### 💡 نصائح رياضية متنوعة لك:")
-
-        fitness_advices = [
-            "✅ **قاعدة الـ 10%:** لا تزد شدة تمارينك أكثر من 10% أسبوعياً لتجنب الإصابات.",
-            "💧 **الترطيب:** اشرب الماء بشكل منتظم قبل وأثناء وبعد التمرين.",
-            "😴 **الاستشفاء:** العضلات تحتاج إلى الراحة والنوم للتعافي.",
-            "🍎 **التغذية:** ركز على الحصول على كمية مناسبة من البروتين.",
-            "⏱️ **الراحة:** امنح عضلاتك وقتاً مناسباً للتعافي بين الجلسات.",
-            "🧘 **الإطالة:** خصص وقتاً مناسباً للحركة والإحماء."
-        ]
-
-        selected_advices = random.sample(fitness_advices, 3)
-
-        for adv in selected_advices:
-            st.markdown(
-                f"<div class='advice-box'>{adv}</div>",
-                unsafe_allow_html=True
-            )
-
-
-# ============================================================
-# 3. صفحة تحدي العادات
-# ============================================================
-
-elif st.session_state.current_page == 'habits':
-
-    st.title("🚫 مختبر تغيير العادات")
-
-    if st.button("⬅️ العودة للرئيسية", key="back_habits"):
-        navigate_to('home')
-        st.rerun()
-
-    col_h1, col_h2 = st.columns(2)
-
-    with col_h1:
-
-        habit_name = st.text_input(
-            "ما هي العادة التي تود كسرها؟ "
-            "(مثلاً: التدخين، السهر، السكريات)"
-        )
-
-        severity = st.select_slider(
-            "مدى صعوبة العادة بالنسبة لك:",
-            options=["سهلة", "متوسطة", "صعبة", "إدمان"]
-        )
-
-    with col_h2:
-
-        trigger = st.selectbox(
-            "ما هو المحفز الرئيسي لهذه العادة؟",
-            [
-                "الملل",
-                "التوتر",
-                "أصدقاء السوء",
-                "الفراغ",
-                "الوقت (مثلاً قبل النوم)"
-            ]
-        )
-
-    if st.button("🚀 تحليل العادة ووضع خطة"):
-
-        st.markdown(
-            f"### 🛡️ خطة التخلص من {habit_name}:"
-        )
-
-        habit_tips = {
-            "الملل":
-                "استبدل العادة بنشاط آخر يشغلك ويبعدك عن المحفز.",
-            "التوتر":
-                "جرب التنفس الهادئ والمشي أو تغيير المكان عند الشعور بالرغبة.",
-            "أصدقاء السوء":
-                "غير البيئة المحيطة بك وابتعد عن المحفزات قدر الإمكان.",
-            "الفراغ":
-                "املأ وقتك بأنشطة مفيدة وجدول واضح.",
-            "الوقت":
-                "غير روتينك في الوقت الذي ترتبط فيه العادة عادةً."
-        }
-
-        st.info(
-            f"📍 **نصيحة للمحفز ({trigger}):** "
-            f"{habit_tips[trigger]}"
-        )
-
-        st.markdown("#### 🧠 استراتيجيات نفسية متنوعة:")
-
-        general_habits = [
-            "✨ **قاعدة الـ 5 ثوانٍ:** عندما تأتيك الرغبة، تحرك فوراً لفعل شيء آخر.",
-            "🔗 **ربط العادات:** اربط عادة جديدة جيدة بروتين موجود لديك.",
-            "📉 **التدرج:** ركز على خطوات قابلة للاستمرار.",
-            "📝 **التدوين:** سجل متى ولماذا تظهر الرغبة لتتعرف على المحفزات."
-        ]
-
-        for h_adv in random.sample(general_habits, 2):
-
-            st.markdown(
-                f"<div class='advice-box'>{h_adv}</div>",
-                unsafe_allow_html=True
-            )
-
-
-# ============================================================
-# 4. صفحة التحدي الدراسي
-# ============================================================
-
-elif st.session_state.current_page == 'study':
-
-    st.title("📚 مركز التميز الأكاديمي")
-
-    if st.button("⬅️ العودة للرئيسية", key="back_study"):
-        navigate_to('home')
-        st.rerun()
-
-    major = st.selectbox(
-        "اختر تخصصك بدقة:",
-        [
-            "هندسة الشبكات",
-            "الأمن السيبراني",
-            "الذكاء الاصطناعي",
-            "علوم الحاسب",
-            "الطب",
-            "الهندسة الميكانيكية",
-            "إدارة الأعمال",
-            "المحاسبة",
-            "القانون",
-            "التمريض",
-            "الهندسة الكهربائية"
-        ]
-    )
-
-    study_data = {
-
-        "هندسة الشبكات": [
-            "تخصص في محاكاة GNS3 و EVE-NG.",
-            "احصل على شهادة CCNA قبل التخرج.",
-            "افهم OSI Model بشكل جيد."
-        ],
-
-        "الأمن السيبراني": [
-            "تعلم أساسيات Linux.",
-            "مارس تحديات CTF.",
-            "شهادة Security+ خيار جيد للبداية."
-        ],
-
-        "الذكاء الاصطناعي": [
-            "أتقن الرياضيات الأساسية.",
-            "تعلم Pandas و Scikit-learn.",
-            "ابنِ مشاريع ببيانات حقيقية."
-        ],
-
-        "علوم الحاسب": [
-            "ركز على هياكل البيانات.",
-            "حل مشكلات البرمجة.",
-            "افهم إدارة الذاكرة."
-        ],
-
-        "الطب": [
-            "استخدم Anki.",
-            "اربط المعلومة بالحالة السريرية.",
-            "ركز على المراجعة المستمرة."
-        ],
-
-        "الهندسة الميكانيكية": [
-            "أتقن برامج CAD.",
-            "افهم الديناميكا الحرارية.",
-            "تابع مشاريع التصنيع الحديثة."
-        ],
-
-        "إدارة الأعمال": [
-            "تعلم Excel و Power BI.",
-            "اقرأ في القيادة.",
-            "افهم التسويق الرقمي."
-        ],
-
-        "المحاسبة": [
-            "افهم IFRS.",
-            "تدرب على برامج المحاسبة.",
-            "ركز على دقة الأرقام."
-        ],
-
-        "القانون": [
-            "درب نفسك على الصياغة القانونية.",
-            "تابع الأحكام القضائية.",
-            "مارس المحاكم الصورية."
-        ],
-
-        "التمريض": [
-            "اهتم بالجانب الإنساني.",
-            "أتقن مهارات الطوارئ.",
-            "تعلم قياس المؤشرات الحيوية."
-        ],
-
-        "الهندسة الكهربائية": [
-            "ركز على الطاقة والتحكم.",
-            "أتقن MATLAB.",
-            "افهم الدوائر والأنظمة المدمجة."
-        ]
-    }
-
-    st.success(
-        f"📌 **خطة التميز لتخصص {major}:**"
-    )
-
-    for tip in study_data[major]:
-        st.write(f"- {tip}")
-
-    st.markdown("---")
-
-    st.subheader(
-        "💡 نصائح دراسية عامة"
-    )
-
-    general_study = [
-        "🍅 **تقنية البومودورو:** ادرس 25 دقيقة ثم خذ استراحة.",
-        "🎧 **بيئة الدراسة:** قلل المشتتات أثناء الدراسة.",
-        "🖍️ **الخرائط الذهنية:** حول المعلومات المعقدة إلى رسومات.",
-        "👨‍🏫 **تقنية فينمان:** اشرح ما درسته بكلماتك."
+    st.session_state.nav += 1
+    st.rerun()
+
+# ===================== الخلفيات =====================
+@st.cache_data(show_spinner=False)
+def load_bg(name):
+    for n in (name, "home"):
+        for ext in ("jpg", "jpeg", "png", "webp"):
+            p = os.path.join(BG_DIR, f"{n}.{ext}")
+            if os.path.exists(p):
+                mime = "jpeg" if ext in ("jpg", "jpeg") else ext
+                with open(p, "rb") as f:
+                    return f"data:image/{mime};base64," + base64.b64encode(f.read()).decode()
+    return None
+
+# ===================== التصميم =====================
+def inject_css(page):
+    ab = "A" if st.session_state.nav % 2 == 0 else "B"   # تبديل اسم الأنيميشن يعيد تشغيله عند كل انتقال
+    bg = load_bg(page)
+    bg_css = (f"linear-gradient(rgba(10,14,20,.80), rgba(10,14,20,.92)), url('{bg}') center/cover fixed"
+              if bg else "linear-gradient(-45deg,#0b0f16,#10243a,#0d2a22,#1b1633)")
+    st.markdown(f"""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap');
+html, body, [class*="css"], [data-testid="stMarkdownContainer"] {{ font-family:'Cairo',sans-serif; }}
+
+[data-testid="stAppViewContainer"] {{
+    background: {bg_css}; background-size: {'cover' if bg else '400% 400%'};
+    {'' if bg else 'animation: drift 20s ease infinite;'}
+    color:#c9d4e0; direction:rtl; text-align:right;
+}}
+[data-testid="stHeader"] {{ background:transparent; }}
+#MainMenu, footer, [data-testid="stToolbar"] {{ visibility:hidden; }}
+[data-testid="stBottom"] > div {{ background:transparent; }}
+.block-container {{ max-width:1100px; padding-top:2rem; padding-bottom:5rem;
+    animation: fade{ab} .75s cubic-bezier(.22,1,.36,1); }}
+[data-testid="stSlider"], [data-testid="stSelectSlider"] {{ direction:ltr; }}
+
+/* ستارة الانتقال: تغطي الشاشة ثم تنكشف بنعومة */
+.veil {{ position:fixed; inset:0; background:#0a0e14; z-index:9998; pointer-events:none;
+    opacity:0; animation: veil{ab} .8s ease forwards; }}
+@keyframes veilA {{ 0%{{opacity:1}} 100%{{opacity:0}} }}
+@keyframes veilB {{ 0%{{opacity:1}} 100%{{opacity:0}} }}
+@keyframes fadeA {{ from{{opacity:0; transform:translateY(24px) scale(.985)}} to{{opacity:1; transform:none}} }}
+@keyframes fadeB {{ from{{opacity:0; transform:translateY(24px) scale(.985)}} to{{opacity:1; transform:none}} }}
+@keyframes drift {{ 0%{{background-position:0% 50%}} 50%{{background-position:100% 50%}} 100%{{background-position:0% 50%}} }}
+
+h1.hero {{ text-align:center; font-weight:800; font-size:3rem; margin:.5rem 0;
+    background:linear-gradient(90deg,#7ee787,#539bf5); -webkit-background-clip:text; color:transparent; }}
+p.sub {{ text-align:center; color:#9aa9b9; font-size:1.15rem; line-height:1.9; }}
+
+.card {{ padding:26px; border-radius:22px; text-align:center; margin-bottom:14px; min-height:210px;
+    background:rgba(22,27,34,.62); backdrop-filter:blur(14px); border:1px solid rgba(255,255,255,.09);
+    transition:.35s; }}
+.card:hover {{ border-color:#539bf5; transform:translateY(-6px); box-shadow:0 14px 34px rgba(83,155,245,.18); }}
+.card h2 {{ color:#fff; font-weight:700; }}
+
+div.stButton > button {{ width:100%; border-radius:14px; height:3.4em; background:#238636; color:#fff;
+    font-weight:700; border:none; transition:.3s; margin-bottom:22px; }}
+div.stButton > button:hover {{ background:#2ea043; color:#fff; transform:translateY(-2px);
+    box-shadow:0 6px 18px rgba(46,160,67,.4); }}
+
+.advice-box {{ padding:15px 18px; border-right:5px solid #539bf5; background:rgba(34,39,46,.75);
+    backdrop-filter:blur(8px); border-radius:8px; margin:10px 0; }}
+[data-testid="stChatMessage"] {{ background:rgba(28,33,40,.7); border-radius:16px; backdrop-filter:blur(8px); }}
+[data-testid="stMetric"] {{ background:rgba(22,27,34,.65); border:1px solid rgba(255,255,255,.08);
+    border-radius:16px; padding:14px; }}
+.seo-section, .brand-box {{ margin-top:30px; padding:24px; border-radius:18px; text-align:center;
+    background:rgba(22,27,34,.6); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,.08); }}
+.seo-section h2, .brand-box span {{ color:#539bf5; }}
+.seo-section p {{ line-height:1.9; }}
+.footer-text {{ position:fixed; bottom:0; left:0; padding:8px 15px; background:#0a0e14;
+    color:#539bf5; font-size:14px; font-weight:700; z-index:999; }}
+
+@media (prefers-reduced-motion: reduce) {{ .veil, .block-container {{ animation:none; }} }}
+</style>
+<div class="veil"></div>
+<div class="footer-text">حقوق التطوير محفوظة لـ عبد الله © 2026</div>
+""", unsafe_allow_html=True)
+
+def back_button(key):
+    if st.button("⬅️ العودة للرئيسية", key=key):
+        go("home")
+
+def advice(text):
+    st.markdown(f"<div class='advice-box'>{text}</div>", unsafe_allow_html=True)
+
+# ===================== الذكاء الاصطناعي =====================
+def get_key():
+    try:
+        return st.secrets["ANTHROPIC_API_KEY"]
+    except Exception:
+        return os.environ.get("ANTHROPIC_API_KEY")
+
+TOPICS = [
+    (["تخصص", "محتار", "دراس", "مجال", "جامعة"], [
+        "الحيرة طبيعية! قلي وش تحب أكثر: التقنية، الطب، الأرقام، ولا التعامل مع الناس؟ وأرشح لك. وتقدر تشوف نصايح كل تخصص في التحدي الدراسي 📚",
+        "جرب تسأل نفسك: وش المجال اللي تقدر تتعلمه ساعات وما تمل؟ هذا غالباً هو تخصصك. جرب التحدي الدراسي عندنا."]),
+    (["وزن", "رجيم", "سعرات", "دهون", "رياض", "تمرين", "عضل"], [
+        "النزول الصحي يبي عجز سعرات بسيط وثبات، مو تجويع. ادخل التحدي الرياضي وحط بياناتك وأحسب لك سعراتك وبروتينك 🏋️",
+        "ابدأ بحساب احتياجك من التحدي الرياضي، وبعدها امشِ عليه أسبوعين وقيّم النتيجة."]),
+    (["عادة", "عادات", "سهر", "تدخين", "ادمان", "إدمان", "جوال"], [
+        "كسر العادة يبدأ بمعرفة المحفز. ادخل تحدي العادات، اكتب العادة وحدد وش يشغلها، وتطلع لك خطة 🚫",
+        "لا تحاول تقطعها مرة وحدة، استبدلها بشي ثاني وقلل تدريجياً. جرب مختبر العادات."]),
+    (["مذاكرة", "ذاكر", "امتحان", "اختبار", "تركيز"], [
+        "جرب البومودورو: 25 دقيقة تركيز و5 راحة، وبعدها اشرح اللي ذاكرته بكلامك (تقنية فينمان) 🍅"]),
+]
+DEFAULT = ["يا هلا! ما فهمت قصدك 100%، بس أقدر أساعدك في الدراسة والرياضة والعادات. وش تبي نبدأ فيه؟"]
+
+def local_stream(q):
+    reply = next((random.choice(r) for kws, r in TOPICS if any(k in q for k in kws)), random.choice(DEFAULT))
+    for w in reply.split(" "):
+        yield w + " "
+        time.sleep(0.03)
+
+def llm_stream(history, key):
+    try:
+        import anthropic
+        client = anthropic.Anthropic(api_key=key)
+        msgs = [m for m in history][-12:]
+        while msgs and msgs[0]["role"] != "user":
+            msgs.pop(0)
+        with client.messages.stream(model=MODEL, max_tokens=600, system=SYSTEM_PROMPT, messages=msgs) as s:
+            for t in s.text_stream:
+                yield t
+    except Exception:
+        yield "صار عندي خلل بسيط في الاتصال 😅 جرب ترسل مرة ثانية بعد شوي."
+
+# ===================== الصفحات =====================
+def page_home():
+    st.markdown("<h1 class='hero'>🚀 منصة التطوير الذاتي الشاملة</h1>"
+                "<p class='sub'>الدراسة والرياضة وتغيير العادات ومساعد ذكي، كلها في مكان واحد.</p>",
+                unsafe_allow_html=True)
+    cards = [
+        ("fitness", "🏋️ التحدي الرياضي", "احسب سعراتك وبروتينك واحصل على نصائح تناسب هدفك."),
+        ("study", "📚 التحدي الدراسي", "خطط ونصائح تخصصية ترفع مستواك الأكاديمي."),
+        ("habits", "🚫 تحدي العادات", "استراتيجيات عملية لكسر العادات السلبية وبناء أفضل منها."),
+        ("ai_chat", "🤖 المساعد الذكي", "اسأله عن الدراسة أو الرياضة أو العادات وسولف معه."),
     ]
+    cols = st.columns(2)
+    for i, (page, title, desc) in enumerate(cards):
+        with cols[i % 2]:
+            st.markdown(f"<div class='card'><h2>{title}</h2><p>{desc}</p></div>", unsafe_allow_html=True)
+            if st.button("ادخل", key=f"btn_{page}"):
+                go(page)
+    st.markdown("""<div class="seo-section"><h2>منصة التطوير الذاتي الشاملة</h2>
+        <p>منصة تفاعلية تساعدك على تطوير نفسك: التحدي الرياضي، تحدي العادات، التحدي الدراسي، ومساعد الذكاء الاصطناعي.</p></div>
+        <div class="brand-box"><span>منصة التطوير الذاتي الشاملة</span><br>تطوير الذات • الدراسة • الرياضة • العادات • الذكاء الاصطناعي</div>""",
+                unsafe_allow_html=True)
 
-    for gs in random.sample(general_study, 2):
+def page_fitness():
+    st.title("🏋️ التحدي الرياضي الذكي")
+    back_button("back_fit")
+    c1, c2 = st.columns(2)
+    with c1:
+        gender = st.radio("الجنس:", ["ذكر", "أنثى"], horizontal=True)
+        weight = st.number_input("الوزن (كجم):", 30.0, 250.0, 75.0)
+        height = st.number_input("الطول (سم):", 100.0, 250.0, 175.0)
+        age = st.number_input("العمر:", 10, 90, 22)
+    with c2:
+        acts = {"خامل جداً": 1.2, "تمارين خفيفة (1-2 يوم)": 1.375, "نشاط متوسط (3-4 أيام)": 1.55,
+                "نشاط مكثف (5-6 أيام)": 1.725, "محترف/بطل رياضي": 1.9}
+        activity = st.radio("نشاطك الأسبوعي:", list(acts))
+        goal = st.selectbox("هدفك:", ["تنشيف (خسارة دهون)", "تضخيم (بناء عضل)", "لياقة عامة"])
+    if st.button("📊 توليد التقرير والنصائح"):
+        bmr = 10 * weight + 6.25 * height - 5 * age + (5 if gender == "ذكر" else -161)
+        tdee = bmr * acts[activity]
+        target = tdee - 500 if "تنشيف" in goal else tdee + 400 if "تضخيم" in goal else tdee
+        m = st.columns(4)
+        m[0].metric("سعرات المحافظة", f"{int(tdee)}")
+        m[1].metric("هدفك اليومي", f"{int(target)}")
+        m[2].metric("بروتين (جم)", f"{int(weight * 1.8)}")
+        m[3].metric("ماء (لتر)", f"{weight * 0.035:.1f}")
+        tips = ["✅ **قاعدة الـ 10%:** لا تزد شدة تمارينك أكثر من 10% أسبوعياً.",
+                "💧 **الترطيب:** اشرب الماء قبل التمرين وأثناءه وبعده.",
+                "😴 **الاستشفاء:** العضلات تنمو وقت النوم، لا تقلل ساعاتك.",
+                "🍎 **التغذية:** وزّع البروتين على وجباتك.",
+                "⏱️ **الراحة:** يوم راحة على الأقل بين تمارين نفس العضلة.",
+                "🧘 **الإحماء:** 5-10 دقائق تحمية تقلل الإصابات."]
+        for t in random.sample(tips, 3):
+            advice(t)
+        st.caption("التقديرات عامة وليست بديلاً عن استشارة مختص تغذية.")
 
-        st.markdown(
-            f"<div class='advice-box'>{gs}</div>",
-            unsafe_allow_html=True
-        )
+def page_habits():
+    st.title("🚫 مختبر تغيير العادات")
+    back_button("back_habits")
+    c1, c2 = st.columns(2)
+    with c1:
+        habit = st.text_input("ما العادة التي تود كسرها؟ (مثلاً: السهر، السكريات)")
+        st.select_slider("صعوبتها عليك:", ["سهلة", "متوسطة", "صعبة", "إدمان"])
+    with c2:
+        trigger = st.selectbox("المحفز الرئيسي:", ["الملل", "التوتر", "أصدقاء السوء", "الفراغ", "الوقت (مثلاً قبل النوم)"])
+    if st.button("🚀 حلل العادة وضع الخطة"):
+        tips = {"الملل": "استبدل العادة بنشاط يشغل يديك وعقلك.",
+                "التوتر": "جرب التنفس العميق أو المشي 5 دقائق عند الرغبة.",
+                "أصدقاء السوء": "غيّر البيئة وقلل الاحتكاك بالمحفزات.",
+                "الفراغ": "اعمل جدولاً يومياً واضحاً يملأ أوقات الفراغ.",
+                "الوقت (مثلاً قبل النوم)": "غيّر روتين هذا الوقت بالكامل."}
+        st.markdown(f"### 🛡️ خطة التخلص من {habit or 'العادة'}")
+        st.info(f"📍 **نصيحة للمحفز ({trigger}):** {tips[trigger]}")
+        general = ["✨ **قاعدة الـ 5 ثوانٍ:** إذا جتك الرغبة تحرك فوراً لشي ثاني.",
+                   "🔗 **ربط العادات:** اربط عادة جيدة بروتين موجود عندك.",
+                   "📉 **التدرج:** خطوات صغيرة تقدر تستمر عليها.",
+                   "📝 **التدوين:** سجل متى ولماذا تظهر الرغبة."]
+        for g in random.sample(general, 2):
+            advice(g)
 
+STUDY = {
+    "هندسة الشبكات": ["تدرب على GNS3 و EVE-NG.", "احصل على CCNA قبل التخرج.", "افهم OSI Model جيداً."],
+    "الأمن السيبراني": ["تعلم أساسيات Linux.", "مارس تحديات CTF.", "Security+ بداية ممتازة."],
+    "الذكاء الاصطناعي": ["أتقن الرياضيات الأساسية.", "تعلم Pandas و Scikit-learn.", "ابنِ مشاريع ببيانات حقيقية."],
+    "علوم الحاسب": ["ركز على هياكل البيانات.", "حل مسائل برمجية يومياً.", "افهم إدارة الذاكرة."],
+    "الطب": ["استخدم Anki للتكرار المتباعد.", "اربط المعلومة بالحالة السريرية.", "راجع باستمرار."],
+    "الهندسة الميكانيكية": ["أتقن برامج CAD.", "افهم الديناميكا الحرارية.", "تابع التصنيع الحديث."],
+    "إدارة الأعمال": ["تعلم Excel و Power BI.", "اقرأ في القيادة.", "افهم التسويق الرقمي."],
+    "المحاسبة": ["افهم IFRS.", "تدرب على برامج المحاسبة.", "ركز على دقة الأرقام."],
+    "القانون": ["درب نفسك على الصياغة القانونية.", "تابع الأحكام القضائية.", "شارك في المحاكم الصورية."],
+    "التمريض": ["اهتم بالجانب الإنساني.", "أتقن مهارات الطوارئ.", "تعلم قياس المؤشرات الحيوية."],
+    "الهندسة الكهربائية": ["ركز على الطاقة والتحكم.", "أتقن MATLAB.", "افهم الدوائر والأنظمة المدمجة."],
+}
 
-# ============================================================
-# 5. صفحة الذكاء الاصطناعي
-# ============================================================
+def page_study():
+    st.title("📚 مركز التميز الأكاديمي")
+    back_button("back_study")
+    major = st.selectbox("اختر تخصصك:", list(STUDY))
+    st.success(f"📌 **خطة التميز لتخصص {major}:**")
+    for t in STUDY[major]:
+        st.write(f"- {t}")
+    st.markdown("---")
+    st.subheader("💡 نصائح دراسية عامة")
+    general = ["🍅 **البومودورو:** 25 دقيقة دراسة ثم استراحة.", "🎧 **البيئة:** قلل المشتتات، الجوال بعيد عنك.",
+               "🖍️ **الخرائط الذهنية:** حوّل المعلومات المعقدة لرسومات.", "👨‍🏫 **فينمان:** اشرح ما درسته بكلماتك."]
+    for g in random.sample(general, 2):
+        advice(g)
 
-elif st.session_state.current_page == 'ai_chat':
-
-    st.title("🤖 منصة التطوير الذاتي الشاملة")
-
-    st.markdown(
-        "اسألني عن أي شيء في الموقع، وسأقوم بشرحه لك بعفوية تامة وبدون تكلف!"
-    )
-
-    col_btn1, col_btn2 = st.columns([1, 1])
-
-    with col_btn1:
-
-        if st.button(
-            "⬅️ العودة للرئيسية",
-            key="back_ai"
-        ):
-            navigate_to('home')
-            st.rerun()
-
-    with col_btn2:
-
-        if st.button(
-            "🗑️ مسح جميع الرسائل وبدء محادثة جديدة",
-            key="clear_ai"
-        ):
+def page_ai():
+    st.title("🤖 المساعد الذكي")
+    c1, c2 = st.columns(2)
+    with c1:
+        if st.button("⬅️ العودة للرئيسية", key="back_ai"):
+            go("home")
+    with c2:
+        if st.button("🗑️ محادثة جديدة", key="clear_ai"):
             reset_ai_messages()
             st.rerun()
 
-    st.write("---")
+    for m in st.session_state.ai_messages:
+        with st.chat_message(m["role"]):
+            st.markdown(m["content"])
 
-    for message in st.session_state.ai_messages:
+    prompt = st.chat_input("فضفض لي أو اسألني عن أي شيء...")
+    if len(st.session_state.ai_messages) == 1:
+        qc = st.columns(len(QUICK))
+        for i, q in enumerate(QUICK):
+            if qc[i].button(q, key=f"q{i}"):
+                prompt = q
 
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
-
-    if user_query := st.chat_input(
-        "فضفض لي أو اسألني عن أي قسم (تخصص، رجيم، عادات)..."
-    ):
-
-        st.session_state.ai_messages.append(
-            {
-                "role": "user",
-                "content": user_query
-            }
-        )
-
+    if prompt:
+        used = sum(m["role"] == "user" for m in st.session_state.ai_messages)
+        st.session_state.ai_messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
-            st.markdown(user_query)
-
-        query_lower = user_query.lower()
-
-        # ====================================================
-        # 1. التخصصات
-        # ====================================================
-
-        if (
-            "محتار" in query_lower
-            or "تخصص" in query_lower
-            or "أختار" in query_lower
-            or "دراسي" in query_lower
-            or "مجال" in query_lower
-        ):
-
-            if "طب" in query_lower:
-
-                ai_reply = (
-                    "يا هلا! بما إنك تحب الطب، فهذا اختيار جميل. "
-                    "في التحدي الدراسي عندنا بالمنصة، بنقترح عليك "
-                    "التركيز على الحفظ العميق وربط المعلومات بالحالات."
-                )
-
-            elif (
-                "هندس" in query_lower
-                or "شبكات" in query_lower
-                or "أمن" in query_lower
-                or "حاسب" in query_lower
-            ):
-
-                ai_reply = (
-                    "ممتاز جداً! المجال التقني مناسب للي يحب "
-                    "الحلول والمنطق. عندنا مسارات مثل هندسة الشبكات "
-                    "والأمن السيبراني والذكاء الاصطناعي وعلوم الحاسب."
-                )
-
-            else:
-
-                ai_reply = (
-                    "الحيرة بين التخصصات أمر طبيعي. "
-                    "علمني التخصصين اللي محتار بينهم، "
-                    "وأعطيك مقارنة تساعدك على الاختيار."
-                )
-
-        # ====================================================
-        # 2. الرياضة
-        # ====================================================
-
-        elif (
-            "رياضي" in query_lower
-            or "رياضة" in query_lower
-            or "سعرات" in query_lower
-            or "دهون" in query_lower
-            or "وزن" in query_lower
-            or "أكل" in query_lower
-        ):
-
-            if (
-                "دهوني" in query_lower
-                or "أكل" in query_lower
-                or "تنزل" in query_lower
-                or "اخسر" in query_lower
-            ):
-
-                ai_reply = (
-                    "الدهون الزائدة تحتاج إلى عجز سعرات واستمرارية، "
-                    "مو قطع الأكل بشكل مفاجئ. ادخل التحدي الرياضي "
-                    "وحط وزنك وطولك ونشاطك للحصول على تقدير السعرات."
-                )
-
-            else:
-
-                ai_reply = (
-                    "التحدي الرياضي يساعدك على حساب احتياجك من السعرات "
-                    "حسب الوزن والطول والعمر والنشاط والهدف."
-                )
-
-        # ====================================================
-        # 3. العادات
-        # ====================================================
-
-        elif (
-            "عادة" in query_lower
-            or "عادات" in query_lower
-            or "سهر" in query_lower
-            or "التدخين" in query_lower
-        ):
-
-            ai_reply = (
-                "في مختبر تغيير العادات، حدد العادة والمحفز الرئيسي لها، "
-                "وبناءً عليه تحصل على خطوات واستراتيجيات عملية تساعدك "
-                "على تغيير السلوك تدريجياً."
-            )
-
-        # ====================================================
-        # 4. التعريف بالمنصة
-        # ====================================================
-
-        elif (
-            "من أنت" in query_lower
-            or "من هي" in query_lower
-            or "موقع" in query_lower
-            or "عبد الله" in query_lower
-        ):
-
-            ai_reply = (
-                "أنا مساعد «منصة التطوير الذاتي الشاملة» 🤖. "
-                "المنصة تجمع بين تطوير الذات والدراسة والرياضة "
-                "وتغيير العادات والذكاء الاصطناعي."
-            )
-
-        # ====================================================
-        # 5. الرد العام
-        # ====================================================
-
-        else:
-
-            ai_reply = (
-                f"يا هلا فيك! استفسارك ({user_query}) جميل. "
-                "عندنا التحدي الرياضي، تحدي العادات، التحدي الدراسي "
-                "ومساعد الذكاء الاصطناعي. وش القسم اللي تبي تعرف عنه أكثر؟"
-            )
-
-        st.session_state.ai_messages.append(
-            {
-                "role": "assistant",
-                "content": ai_reply
-            }
-        )
-
+            st.markdown(prompt)
         with st.chat_message("assistant"):
-            st.markdown(ai_reply)
+            if used >= MAX_USER_MSGS:
+                reply = "وصلت للحد الأقصى من الرسائل في هذي الجلسة، ابدأ محادثة جديدة 🙏"
+                st.markdown(reply)
+            else:
+                key = get_key()
+                gen = llm_stream(st.session_state.ai_messages, key) if key else local_stream(prompt)
+                reply = st.write_stream(gen)
+        st.session_state.ai_messages.append({"role": "assistant", "content": reply})
+
+# ===================== التشغيل =====================
+PAGES = {"home": page_home, "fitness": page_fitness, "habits": page_habits,
+         "study": page_study, "ai_chat": page_ai}
+page = st.session_state.current_page
+inject_css(page)
+PAGES[page]()
