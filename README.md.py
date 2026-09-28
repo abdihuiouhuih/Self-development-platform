@@ -1,14 +1,14 @@
 import os, base64, random, time
 import streamlit as st
-
+ 
 st.set_page_config(page_title="منصة التطوير الذاتي الشاملة", page_icon="🚀",
                    layout="wide", initial_sidebar_state="collapsed")
-
+ 
 # ===================== إعدادات =====================
 MODEL = "claude-haiku-4-5-20251001"   # سريع ورخيص، غيّره لو تبي أقوى
 MAX_USER_MSGS = 40                    # حد الرسائل لكل زائر (يحميك من الفاتورة)
 BG_DIR = "backgrounds"                # ضع الصور هنا: home.jpg / fitness.jpg / habits.jpg / study.jpg / ai_chat.jpg
-
+ 
 SYSTEM_PROMPT = """أنت مساعد «منصة التطوير الذاتي الشاملة» من تطوير عبد الله.
 تكلم بلهجة سعودية بيضاء ودودة وخفيفة، كأنك صديق، وبردود قصيرة ومفيدة (3-6 أسطر غالباً).
 أقسام المنصة: 🏋️ التحدي الرياضي (حساب السعرات BMR/TDEE والبروتين والماء حسب الهدف)،
@@ -17,25 +17,25 @@ SYSTEM_PROMPT = """أنت مساعد «منصة التطوير الذاتي ال
 وجّه المستخدم للقسم المناسب في المنصة عند الحاجة، ولا تخترع ميزات غير موجودة.
 لا تشخّص أمراضاً ولا تعطِ علاجات؛ في الحالات الصحية أو النفسية الجادة انصح بمراجعة مختص.
 إذا خرج السؤال عن التطوير الذاتي رد باختصار ثم أرجعه بلطف لمواضيع المنصة."""
-
+ 
 QUICK = ["محتار في التخصص", "كيف أنزل وزني؟", "أبغى أكسر عادة السهر", "ذاكر بطريقة أفضل"]
-
+ 
 # ===================== حالة الجلسة =====================
 def reset_ai_messages():
     st.session_state.ai_messages = [{"role": "assistant", "content":
         "يا هلا والله! أنا مساعدك في «منصة التطوير الذاتي الشاملة» 👋 "
         "محتار بتخصص؟ تبي تنزل وزنك؟ تبي تكسر عادة؟ فضفض لي وش شاغل بالك."}]
-
+ 
 st.session_state.setdefault("current_page", "home")
 st.session_state.setdefault("nav", 0)
 if "ai_messages" not in st.session_state:
     reset_ai_messages()
-
+ 
 def go(page):
     st.session_state.current_page = page
     st.session_state.nav += 1
     st.rerun()
-
+ 
 # ===================== الخلفيات =====================
 @st.cache_data(show_spinner=False)
 def load_bg(name):
@@ -47,7 +47,7 @@ def load_bg(name):
                 with open(p, "rb") as f:
                     return f"data:image/{mime};base64," + base64.b64encode(f.read()).decode()
     return None
-
+ 
 # ===================== التصميم =====================
 def inject_css(page):
     ab = "A" if st.session_state.nav % 2 == 0 else "B"   # تبديل اسم الأنيميشن يعيد تشغيله عند كل انتقال
@@ -58,7 +58,7 @@ def inject_css(page):
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap');
 html, body, [class*="css"], [data-testid="stMarkdownContainer"] {{ font-family:'Cairo',sans-serif; }}
-
+ 
 [data-testid="stAppViewContainer"] {{
     background: {bg_css}; background-size: {'cover' if bg else '400% 400%'};
     {'' if bg else 'animation: drift 20s ease infinite;'}
@@ -70,7 +70,7 @@ html, body, [class*="css"], [data-testid="stMarkdownContainer"] {{ font-family:'
 .block-container {{ max-width:1100px; padding-top:2rem; padding-bottom:5rem;
     animation: fade{ab} .75s cubic-bezier(.22,1,.36,1); }}
 [data-testid="stSlider"], [data-testid="stSelectSlider"] {{ direction:ltr; }}
-
+ 
 /* ستارة الانتقال: تغطي الشاشة ثم تنكشف بنعومة */
 .veil {{ position:fixed; inset:0; background:#0a0e14; z-index:9998; pointer-events:none;
     opacity:0; animation: veil{ab} .8s ease forwards; }}
@@ -79,22 +79,22 @@ html, body, [class*="css"], [data-testid="stMarkdownContainer"] {{ font-family:'
 @keyframes fadeA {{ from{{opacity:0; transform:translateY(24px) scale(.985)}} to{{opacity:1; transform:none}} }}
 @keyframes fadeB {{ from{{opacity:0; transform:translateY(24px) scale(.985)}} to{{opacity:1; transform:none}} }}
 @keyframes drift {{ 0%{{background-position:0% 50%}} 50%{{background-position:100% 50%}} 100%{{background-position:0% 50%}} }}
-
+ 
 h1.hero {{ text-align:center; font-weight:800; font-size:3rem; margin:.5rem 0;
     background:linear-gradient(90deg,#7ee787,#539bf5); -webkit-background-clip:text; color:transparent; }}
 p.sub {{ text-align:center; color:#9aa9b9; font-size:1.15rem; line-height:1.9; }}
-
+ 
 .card {{ padding:26px; border-radius:22px; text-align:center; margin-bottom:14px; min-height:210px;
     background:rgba(22,27,34,.62); backdrop-filter:blur(14px); border:1px solid rgba(255,255,255,.09);
     transition:.35s; }}
 .card:hover {{ border-color:#539bf5; transform:translateY(-6px); box-shadow:0 14px 34px rgba(83,155,245,.18); }}
 .card h2 {{ color:#fff; font-weight:700; }}
-
+ 
 div.stButton > button {{ width:100%; border-radius:14px; height:3.4em; background:#238636; color:#fff;
     font-weight:700; border:none; transition:.3s; margin-bottom:22px; }}
 div.stButton > button:hover {{ background:#2ea043; color:#fff; transform:translateY(-2px);
     box-shadow:0 6px 18px rgba(46,160,67,.4); }}
-
+ 
 .advice-box {{ padding:15px 18px; border-right:5px solid #539bf5; background:rgba(34,39,46,.75);
     backdrop-filter:blur(8px); border-radius:8px; margin:10px 0; }}
 [data-testid="stChatMessage"] {{ background:rgba(28,33,40,.7); border-radius:16px; backdrop-filter:blur(8px); }}
@@ -106,27 +106,27 @@ div.stButton > button:hover {{ background:#2ea043; color:#fff; transform:transla
 .seo-section p {{ line-height:1.9; }}
 .footer-text {{ position:fixed; bottom:0; left:0; padding:8px 15px; background:#0a0e14;
     color:#539bf5; font-size:14px; font-weight:700; z-index:999; }}
-
+ 
 @media (prefers-reduced-motion: reduce) {{ .veil, .block-container {{ animation:none; }} }}
 </style>
 <div class="veil"></div>
 <div class="footer-text">حقوق التطوير محفوظة لـ عبد الله © 2026</div>
 """, unsafe_allow_html=True)
-
+ 
 def back_button(key):
     if st.button("⬅️ العودة للرئيسية", key=key):
         go("home")
-
+ 
 def advice(text):
     st.markdown(f"<div class='advice-box'>{text}</div>", unsafe_allow_html=True)
-
+ 
 # ===================== الذكاء الاصطناعي =====================
 def get_key():
     try:
         return st.secrets["ANTHROPIC_API_KEY"]
     except Exception:
         return os.environ.get("ANTHROPIC_API_KEY")
-
+ 
 TOPICS = [
     (["تخصص", "محتار", "دراس", "مجال", "جامعة"], [
         "الحيرة طبيعية! قلي وش تحب أكثر: التقنية، الطب، الأرقام، ولا التعامل مع الناس؟ وأرشح لك. وتقدر تشوف نصايح كل تخصص في التحدي الدراسي 📚",
@@ -141,13 +141,13 @@ TOPICS = [
         "جرب البومودورو: 25 دقيقة تركيز و5 راحة، وبعدها اشرح اللي ذاكرته بكلامك (تقنية فينمان) 🍅"]),
 ]
 DEFAULT = ["يا هلا! ما فهمت قصدك 100%، بس أقدر أساعدك في الدراسة والرياضة والعادات. وش تبي نبدأ فيه؟"]
-
+ 
 def local_stream(q):
     reply = next((random.choice(r) for kws, r in TOPICS if any(k in q for k in kws)), random.choice(DEFAULT))
     for w in reply.split(" "):
         yield w + " "
         time.sleep(0.03)
-
+ 
 def llm_stream(history, key):
     try:
         import anthropic
@@ -160,7 +160,7 @@ def llm_stream(history, key):
                 yield t
     except Exception:
         yield "صار عندي خلل بسيط في الاتصال 😅 جرب ترسل مرة ثانية بعد شوي."
-
+ 
 # ===================== الصفحات =====================
 def page_home():
     st.markdown("<h1 class='hero'>🚀 منصة التطوير الذاتي الشاملة</h1>"
@@ -182,7 +182,7 @@ def page_home():
         <p>منصة تفاعلية تساعدك على تطوير نفسك: التحدي الرياضي، تحدي العادات، التحدي الدراسي، ومساعد الذكاء الاصطناعي.</p></div>
         <div class="brand-box"><span>منصة التطوير الذاتي الشاملة</span><br>تطوير الذات • الدراسة • الرياضة • العادات • الذكاء الاصطناعي</div>""",
                 unsafe_allow_html=True)
-
+ 
 def page_fitness():
     st.title("🏋️ التحدي الرياضي الذكي")
     back_button("back_fit")
@@ -215,7 +215,7 @@ def page_fitness():
         for t in random.sample(tips, 3):
             advice(t)
         st.caption("التقديرات عامة وليست بديلاً عن استشارة مختص تغذية.")
-
+ 
 def page_habits():
     st.title("🚫 مختبر تغيير العادات")
     back_button("back_habits")
@@ -239,7 +239,7 @@ def page_habits():
                    "📝 **التدوين:** سجل متى ولماذا تظهر الرغبة."]
         for g in random.sample(general, 2):
             advice(g)
-
+ 
 STUDY = {
     "هندسة الشبكات": ["تدرب على GNS3 و EVE-NG.", "احصل على CCNA قبل التخرج.", "افهم OSI Model جيداً."],
     "الأمن السيبراني": ["تعلم أساسيات Linux.", "مارس تحديات CTF.", "Security+ بداية ممتازة."],
@@ -253,7 +253,7 @@ STUDY = {
     "التمريض": ["اهتم بالجانب الإنساني.", "أتقن مهارات الطوارئ.", "تعلم قياس المؤشرات الحيوية."],
     "الهندسة الكهربائية": ["ركز على الطاقة والتحكم.", "أتقن MATLAB.", "افهم الدوائر والأنظمة المدمجة."],
 }
-
+ 
 def page_study():
     st.title("📚 مركز التميز الأكاديمي")
     back_button("back_study")
@@ -267,7 +267,7 @@ def page_study():
                "🖍️ **الخرائط الذهنية:** حوّل المعلومات المعقدة لرسومات.", "👨‍🏫 **فينمان:** اشرح ما درسته بكلماتك."]
     for g in random.sample(general, 2):
         advice(g)
-
+ 
 def page_ai():
     st.title("🤖 المساعد الذكي")
     c1, c2 = st.columns(2)
@@ -278,18 +278,18 @@ def page_ai():
         if st.button("🗑️ محادثة جديدة", key="clear_ai"):
             reset_ai_messages()
             st.rerun()
-
+ 
     for m in st.session_state.ai_messages:
         with st.chat_message(m["role"]):
             st.markdown(m["content"])
-
+ 
     prompt = st.chat_input("فضفض لي أو اسألني عن أي شيء...")
     if len(st.session_state.ai_messages) == 1:
         qc = st.columns(len(QUICK))
         for i, q in enumerate(QUICK):
             if qc[i].button(q, key=f"q{i}"):
                 prompt = q
-
+ 
     if prompt:
         used = sum(m["role"] == "user" for m in st.session_state.ai_messages)
         st.session_state.ai_messages.append({"role": "user", "content": prompt})
@@ -304,7 +304,7 @@ def page_ai():
                 gen = llm_stream(st.session_state.ai_messages, key) if key else local_stream(prompt)
                 reply = st.write_stream(gen)
         st.session_state.ai_messages.append({"role": "assistant", "content": reply})
-
+ 
 # ===================== التشغيل =====================
 PAGES = {"home": page_home, "fitness": page_fitness, "habits": page_habits,
          "study": page_study, "ai_chat": page_ai}
