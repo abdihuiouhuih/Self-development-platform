@@ -1,7 +1,18 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>منصة التطوير الذاتي الشاملة</title>
+<title>منصة التطوير الذاتي الشاملة | الدراسة والرياضة وتغيير العادات</title>
+<meta name="description" content="منصة التطوير الذاتي الشاملة: احسب سعراتك، خطط دراستك حسب تخصصك، اكسر عاداتك السلبية، واسأل المساعد الذكي. مجاناً وبالعربي.">
+<meta name="keywords" content="منصة التطوير الذاتي الشاملة, تطوير الذات, نصائح دراسية, حساب السعرات, تغيير العادات">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://abdihuiouhuih.github.io/Self-development-platform/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ar_SA">
+<meta property="og:title" content="منصة التطوير الذاتي الشاملة">
+<meta property="og:description" content="الدراسة والرياضة وتغيير العادات ومساعد ذكي في مكان واحد.">
+<meta property="og:url" content="https://abdihuiouhuih.github.io/Self-development-platform/">
+<!-- ضع هنا وسم التحقق من Google Search Console: <meta name="google-site-verification" content="الكود"> -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"منصة التطوير الذاتي الشاملة","alternateName":"Self Development Platform","url":"https://abdihuiouhuih.github.io/Self-development-platform/","inLanguage":"ar"}</script>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&family=Reem+Kufi:wght@600;700&display=swap" rel="stylesheet">
 <style>
 :root{--b:#0b1026;--c:#3a1c71;--ac:#ffb86b;--tx:#eef2f8;--mu:#a9b4c6;--gl:rgba(255,255,255,.07);--bd:rgba(255,255,255,.15);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -34,7 +45,7 @@ button.ghost{background:var(--gl);color:var(--tx);border:1px solid var(--bd)}
 .stat{background:rgba(0,0,0,.25);border-radius:16px;padding:16px;text-align:center}
 .stat b{display:block;font-family:'Reem Kufi';font-size:1.9rem;color:var(--ac)}.stat span{color:var(--mu);font-size:.85rem}
 .tip{border-right:4px solid var(--ac);background:rgba(0,0,0,.25);border-radius:10px;padding:12px 16px;margin:10px 0;line-height:1.8}
-ul{line-height:2;padding-right:20px}
+ul,ol{line-height:2;padding-right:22px}
 .chat{height:52vh;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:4px}
 .m{max-width:85%;padding:11px 15px;border-radius:16px;line-height:1.8;white-space:pre-wrap}
 .m.assistant{background:rgba(255,255,255,.1);align-self:flex-start;border-top-right-radius:4px}
@@ -49,8 +60,8 @@ footer{position:relative;text-align:center;color:var(--mu);font-size:.85rem;padd
 @media(prefers-reduced-motion:reduce){.rv{animation:none;opacity:1}}
 </style></head><body>
 <canvas id="fx"></canvas><div id="scene"></div>
-<main><div id="app"></div></main>
-<footer>حقوق التطوير محفوظة لـ عبد الله © 2026</footer>
+<main><div id="app"><div class="hero"><h1>منصة التطوير الذاتي الشاملة</h1><p>منصة عربية تجمع التحدي الرياضي وحساب السعرات، والتحدي الدراسي لـ 11 تخصصاً، وتحدي تغيير العادات، ومساعداً ذكياً لتطوير الذات.</p></div></div><noscript><p>يلزم تفعيل JavaScript لاستخدام منصة التطوير الذاتي الشاملة.</p></noscript></main>
+<footer>حقوق التطوير محفوظة لـ عبد الله الأحمري</footer>
 <div id="veil"><div></div></div>
 <script>
 const $=s=>document.querySelector(s),app=$('#app'),veil=$('#veil');
@@ -119,28 +130,48 @@ app.innerHTML=back()+`<h2 class="page-t rv">التحدي الدراسي</h2><p c
 <div class="panel rv" style="--i:2"><label>التخصص</label><select id="mj">${Object.keys(ST).map(k=>`<option>${k}</option>`).join('')}</select><div id="out"></div></div>`;
 const show=()=>{const m=$('#mj').value;$('#out').innerHTML=`<h3 style="margin:18px 0 4px">خطة التميز في ${m}</h3><ul>${ST[m].map(t=>`<li>${t}</li>`).join('')}</ul><h3 style="margin:14px 0 4px">نصائح عامة</h3>`+tips(pick(['<b>البومودورو:</b> 25 دقيقة دراسة ثم استراحة.','<b>البيئة:</b> أبعد الجوال عنك وقت المذاكرة.','<b>الخرائط الذهنية:</b> حوّل المعلومات المعقدة لرسومات.','<b>فينمان:</b> اشرح ما درسته بكلماتك.'],2))};
 $('#mj').onchange=show;show()}
+const HB={
+'الملل':['استبدل العادة بنشاط يشغل يديك وعقلك.',['جهّز قائمة 5 أنشطة بديلة (قراءة، مشي، تعلم مهارة) وشغّل واحداً فور الملل.','انتظر 10 دقائق قبل أي قرار، الرغبة غالباً تخف.','اجعل يديك مشغولتين بكرة ضغط أو قلم.']],
+'التوتر':['جرب التنفس العميق أو المشي 5 دقائق عند الرغبة.',['تنفس 4 ثوانٍ شهيقاً و6 زفيراً، كرر 5 مرات.','اكتب اللي مضايقك في ورقة قبل ما تلجأ للعادة.','تكلم مع شخص تثق فيه أو اتصل بصديق.']],
+'أصدقاء السوء':['غيّر البيئة وقلل الاحتكاك بالمحفزات.',['جهّز جملة ترفض فيها بدون شرح: "لا شكراً، أنا أبطلت".','اقترح على أصدقائك مكاناً أو نشاطاً ثانياً.','كوّن دائرة جديدة من ناديك أو دراستك أو هوايتك.']],
+'الفراغ':['اعمل جدولاً يومياً يملأ أوقات فراغك.',['قسّم يومك إلى كتل وقت: كتلة للرياضة وكتلة للهواية.','سجّل في نادٍ أو دورة تلزمك بموعد ثابت.','ابدأ مشروعاً صغيراً تتابعه كل يوم.']],
+'الوقت (قبل النوم مثلاً)':['غيّر روتين هذا الوقت بالكامل.',['ثبّت وقت النوم وأبعد الجوال أو المحفز عن غرفتك.','اعمل روتيناً هادئاً: دش دافئ ثم قراءة 10 دقائق.','اشغل هذا الوقت بنشاط ما يجتمع مع العادة.']]};
+const PLAN=['سجّل كل مرة تمارس فيها العادة ووقتها.','حدد محفزك الأساسي من ملاحظات أمس.','جهّز البديل وضعه في متناول يدك.','قلل العادة إلى النصف.','أبعد أدوات العادة عن بيئتك.','كافئ نفسك بشي بسيط على تقدمك.','راجع تقدمك وضع هدف الأسبوع القادم.'];
+const gs=()=>{try{return JSON.parse(localStorage.getItem('streak'))||{d:0,l:''}}catch(e){return{d:0,l:''}}};
+const ss=o=>{try{localStorage.setItem('streak',JSON.stringify(o))}catch(e){}};
+const dy=n=>new Date(Date.now()-(n||0)*864e5).toLocaleDateString('en-CA');
 function habits(){
-app.innerHTML=back()+`<h2 class="page-t rv">مختبر العادات</h2><p class="page-s rv" style="--i:1">حدد العادة والمحفز وخذ خطة.</p>
+app.innerHTML=back()+`<h2 class="page-t rv">تحدي العادات</h2><p class="page-s rv" style="--i:1">حدد العادة والمحفز وخذ خطة كاملة.</p>
 <div class="panel rv" style="--i:2"><div class="row"><div><label>العادة التي تريد كسرها</label><input id="hb" placeholder="مثلاً: السهر"></div>
-<div><label>صعوبتها عليك</label><select><option>سهلة</option><option>متوسطة</option><option>صعبة</option><option>إدمان</option></select></div>
-<div><label>المحفز الرئيسي</label><select id="tr"><option>الملل</option><option>التوتر</option><option>أصدقاء السوء</option><option>الفراغ</option><option>الوقت (قبل النوم مثلاً)</option></select></div></div>
-<p><button id="pl">ضع الخطة</button></p><div id="out"></div></div>`;
-const TP={'الملل':'استبدل العادة بنشاط يشغل يديك وعقلك.','التوتر':'جرب التنفس العميق أو المشي 5 دقائق عند الرغبة.','أصدقاء السوء':'غيّر البيئة وقلل الاحتكاك بالمحفزات.','الفراغ':'اعمل جدولاً يومياً يملأ أوقات فراغك.','الوقت (قبل النوم مثلاً)':'غيّر روتين هذا الوقت بالكامل.'};
-$('#pl').onclick=()=>{const h=$('#hb').value.trim()||'العادة';const e=document.createElement('span');e.textContent=h;
-$('#out').innerHTML=`<h3>خطة التخلص من ${e.innerHTML}</h3>`+tips(['<b>للمحفز ('+$('#tr').value+'):</b> '+TP[$('#tr').value]].concat(pick(['<b>قاعدة الـ 5 ثوانٍ:</b> إذا جاتك الرغبة تحرك فوراً لشي ثاني.','<b>ربط العادات:</b> اربط عادة جيدة بروتين موجود عندك.','<b>التدرج:</b> خطوات صغيرة تقدر تستمر عليها.','<b>التدوين:</b> سجل متى ولماذا تظهر الرغبة.'],2)))}}
+<div><label>صعوبتها عليك</label><select id="df"><option>سهلة</option><option>متوسطة</option><option>صعبة</option><option>إدمان</option></select></div>
+<div><label>المحفز الرئيسي</label><select id="tr">${Object.keys(HB).map(k=>`<option>${k}</option>`).join('')}</select></div></div>
+<p><button id="pl">ضع الخطة</button></p><div id="out"></div></div>
+<div class="panel rv" style="--i:3"><h3>عداد الأيام النظيفة</h3><div class="stats"><div class="stat"><b id="sn">0</b><span>يوم متواصل</span></div></div>
+<p><button id="sday">سجّلت اليوم بدون العادة ✅</button> <button class="ghost" id="srs">ابدأ من جديد</button></p><p class="page-s" id="sm"></p></div>`;
+$('#pl').onclick=()=>{const h=$('#hb').value.trim()||'العادة',e=document.createElement('span');e.textContent=h;const tr=$('#tr').value,d=$('#df').value,[t,st]=HB[tr];
+$('#out').innerHTML=`<h3>خطة التخلص من ${e.innerHTML}</h3>`+tips(['<b>للمحفز ('+tr+'):</b> '+t])+`<h3 style="margin:16px 0 4px">استراتيجيات مناسبة لمحفزك</h3>`+tips(st)+`<h3 style="margin:16px 0 4px">خطة 7 أيام</h3><ol>${PLAN.map(x=>`<li>${x}</li>`).join('')}</ol>`+((d==='صعبة'||d==='إدمان')?tips(['<b>مهم:</b> مع الصعوبة العالية لا تتردد بطلب دعم مختص أو طبيب، وطلب المساعدة قوة.']):'')};
+const rs=()=>{$('#sn').textContent=gs().d};rs();
+$('#sday').onclick=()=>{const o=gs(),t=dy();if(o.l===t){$('#sm').textContent='سجلت اليوم مسبقاً، ارجع بكرة 👍';return}o.d=o.l===dy(1)?o.d+1:1;o.l=t;ss(o);rs();$('#sm').textContent='ممتاز! استمر 💪'};
+$('#srs').onclick=()=>{ss({d:0,l:''});rs();$('#sm').textContent='بداية جديدة، وأنت تقدر.'}}
 // المساعد
-const SYS='أنت مساعد «منصة التطوير الذاتي الشاملة» من تطوير عبد الله. تكلم بلهجة سعودية بيضاء ودودة وبردود قصيرة ومفيدة (3-6 أسطر). أقسام المنصة: التحدي الرياضي (حساب السعرات والبروتين والماء)، تحدي العادات (خطة لكسر عادة حسب المحفز)، التحدي الدراسي (نصائح لـ 11 تخصصاً)، والمساعد الذكي (أنت). ساعد في اختيار التخصص والدراسة والرياضة والتغذية العامة وكسر العادات والتحفيز، ووجّه المستخدم للقسم المناسب ولا تخترع ميزات. لا تشخّص أمراضاً ولا تصف علاجات، وانصح بمراجعة مختص في الحالات الجادة.';
-let msgs=[{role:'assistant',content:'يا هلا والله! أنا مساعدك في المنصة 👋 محتار بتخصص؟ تبي تنزل وزنك؟ تبي تكسر عادة؟ فضفض لي.'}],ask=false;
-const LOC=[[['تخصص','محتار','دراس','مجال'],'الحيرة طبيعية! قلي وش تحب أكثر: التقنية، الطب، الأرقام، ولا التعامل مع الناس؟ وشوف نصايح كل تخصص في التحدي الدراسي.'],[['وزن','رجيم','سعرات','دهون','رياض'],'النزول الصحي يبي عجز سعرات بسيط وثبات. ادخل التحدي الرياضي واحسب احتياجك.'],[['عادة','سهر','تدخين','جوال'],'كسر العادة يبدأ بمعرفة المحفز. جرب مختبر العادات وحدد وش يشغلها.']];
+const SYS='أنت مساعد «منصة التطوير الذاتي الشاملة» من تطوير عبد الله. تكلم بلهجة سعودية بيضاء ودودة وبردود قصيرة ومفيدة (3-6 أسطر). أقسام المنصة: التحدي الرياضي (حساب السعرات والبروتين والماء)، تحدي العادات (خطة لكسر عادة حسب المحفز)، التحدي الدراسي (نصائح لـ 11 تخصصاً)، والمساعد الذكي (أنت). ساعد في اختيار التخصص وبناء جداول مذاكرة وأنظمة غذائية عامة وتمارين وروتين نوم، والدراسة والرياضة والتغذية العامة وكسر العادات والتحفيز، ووجّه المستخدم للقسم المناسب ولا تخترع ميزات. لا تشخّص أمراضاً ولا تصف علاجات، وانصح بمراجعة مختص في الحالات الجادة.';
+const GREET=[{role:'assistant',content:'يا هلا والله! أنا مساعدك في المنصة 👋 محتار بتخصص؟ تبي تنزل وزنك؟ تبي تكسر عادة؟ فضفض لي.'}];
+const sv=()=>{try{localStorage.setItem('chat',JSON.stringify(msgs.slice(-60)))}catch(e){}};
+let msgs=(()=>{try{const x=JSON.parse(localStorage.getItem('chat'));if(Array.isArray(x)&&x.length)return x}catch(e){}return GREET.map(m=>({...m}))})(),ask=false,cf=0;
+function clearChat(){if(ask)return;const b=$('#clr');
+if(!cf){cf=1;b.textContent='اضغط مرة ثانية للتأكيد';setTimeout(()=>{cf=0;if(b.isConnected)b.textContent='🗑️ مسح المحادثة'},3000);return}
+cf=0;msgs=GREET.map(m=>({...m}));try{localStorage.removeItem('chat')}catch(e){}b.textContent='🗑️ مسح المحادثة';draw()}
+const LOC=[[['تخصص','محتار','دراس','مجال'],'الحيرة طبيعية! قلي وش تحب أكثر: التقنية، الطب، الأرقام، ولا التعامل مع الناس؟ وشوف نصايح كل تخصص في التحدي الدراسي.'],[['وزن','رجيم','سعرات','دهون','رياض'],'النزول الصحي يبي عجز سعرات بسيط وثبات. ادخل التحدي الرياضي واحسب احتياجك.'],[['عادة','سهر','تدخين','جوال'],'كسر العادة يبدأ بمعرفة المحفز. جرب تحدي العادات وحدد وش يشغلها.']];
+LOC.unshift([['نظام غذائي','نظام أكل','دايت','وجبات'],'نظام بسيط: بروتين في كل وجبة (بيض، دجاج، تونة)، خضار مع الغداء، وقلل السكريات والمشروبات الغازية. احسب سعراتك من التحدي الرياضي وقسّمها على 3-4 وجبات.'],[['نوم','سهر','أنام','انام'],'ثبّت وقت النوم والصحوة، وأبعد الجوال ساعة قبل النوم، وقلل الكافيين بعد العصر. وفي تحدي العادات تلقى خطة كاملة للسهر.'],[['جدول','نظام مذاكرة','تنظيم الوقت'],'جدول بسيط: 3 جلسات بومودورو (25 دقيقة) يومياً للمادة الصعبة، ومراجعة سريعة قبل النوم، ويوم أسبوعي للمراجعة الشاملة.'],[['تحفيز','كسل','حماس','احباط'],'ابدأ بخطوة صغيرة جداً (5 دقائق فقط)، الحركة تولد الحماس. وسجل إنجازك كل يوم.']);
 const loc=q=>(LOC.find(l=>l[0].some(k=>q.includes(k)))||[0,'أقدر أساعدك في الدراسة والرياضة والعادات. وش تبي نبدأ فيه؟'])[1];
 function ai(){
 app.innerHTML=back()+`<h2 class="page-t rv">المساعد الذكي</h2><p class="page-s rv" style="--i:1">اسألني أي شي عن دراستك أو لياقتك أو عاداتك.</p>
-<div class="panel rv" style="--i:2"><div class="chat" id="ch"></div><div class="chips" id="cp"></div>
+<div class="panel rv" style="--i:2"><div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button class="ghost" id="clr">🗑️ مسح المحادثة</button></div><div class="chat" id="ch"></div><div class="chips" id="cp"></div>
 <div class="send"><input id="q" placeholder="اكتب رسالتك..."><button id="sd">إرسال</button></div></div>`;
-$('#cp').innerHTML=['محتار في التخصص','كيف أنزل وزني؟','أبغى أكسر عادة السهر','كيف أذاكر بشكل أفضل؟'].map(t=>`<button class="ghost">${t}</button>`).join('');
+$('#cp').innerHTML=['محتار في التخصص','كيف أنزل وزني؟','أبغى أكسر عادة السهر','كيف أذاكر بشكل أفضل؟','اعطني نظام غذائي بسيط','سوّ لي جدول مذاكرة','كيف أنظم نومي؟','ما عندي حماس، وش أسوي؟'].map(t=>`<button class="ghost">${t}</button>`).join('');
 $('#cp').querySelectorAll('button').forEach(b=>b.onclick=()=>send(b.textContent));
-$('#sd').onclick=()=>send($('#q').value);$('#q').onkeydown=e=>{if(e.key==='Enter')send($('#q').value)};draw()}
-function draw(){const ch=$('#ch');if(!ch)return;ch.innerHTML='';msgs.forEach(m=>{const d=document.createElement('div');d.className='m '+m.role;d.textContent=m.content;ch.appendChild(d)});ch.scrollTop=ch.scrollHeight}
+$('#clr').onclick=clearChat;$('#sd').onclick=()=>send($('#q').value);$('#q').onkeydown=e=>{if(e.key==='Enter')send($('#q').value)};draw()}
+function draw(){const ch=$('#ch');if(!ch)return;const cp=$('#cp');if(cp)cp.style.display=msgs.length>1?'none':'flex';ch.innerHTML='';msgs.forEach(m=>{const d=document.createElement('div');d.className='m '+m.role;d.textContent=m.content;ch.appendChild(d)});ch.scrollTop=ch.scrollHeight}
 async function send(q){q=(q||'').trim();if(!q||ask)return;ask=true;$('#q').value='';$('#cp').style.display='none';
 msgs.push({role:'user',content:q});const bot={role:'assistant',content:'...'};msgs.push(bot);draw();
 try{const use=window.claude&&window.claude.use,sm=use?await window.claude.use('sample'):null;
@@ -149,6 +180,6 @@ const hist=msgs.slice(0,-1).filter((m,i,a)=>!(m.role==='assistant'&&i===0)).slic
 hist[0].content=SYS+'\n\n'+hist[0].content;
 const r=await sm(hist,{cache:false,onText:({text})=>{bot.content=text;draw()}});bot.content=r.text}
 catch(e){bot.content=(e&&e.text)||loc(q)}
-draw();ask=false}
+draw();sv();ask=false}
 theme('home');render();
 </script></body></html>
