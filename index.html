@@ -52,7 +52,14 @@ ul,ol{line-height:2;padding-right:22px}
 .m.user{background:var(--ac);color:#111;align-self:flex-end;border-top-left-radius:4px}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.chips button{padding:8px 14px;font-size:.9rem}.chips:empty{display:none}
 .send{display:flex;gap:10px}.send input{flex:1}
-footer{position:relative;text-align:center;color:var(--mu);font-size:.85rem;padding:0 0 24px}
+.ft{position:relative;max-width:760px;margin:10px auto 0;padding:26px 18px 28px;text-align:center;color:var(--mu);font-size:.88rem}
+.ft:before{content:"";display:block;height:1px;margin:0 auto 22px;width:min(420px,80%);background:linear-gradient(90deg,transparent,var(--ac),transparent);opacity:.7}
+.contact{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:12px;margin-top:16px}
+.ct{font-family:'Reem Kufi',sans-serif;font-size:1.15rem;color:var(--tx);margin-left:6px}
+.cl{display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:50%;color:var(--tx);text-decoration:none;background:var(--gl);border:1px solid var(--bd);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:transform .35s cubic-bezier(.2,.8,.2,1),border-color .3s,box-shadow .35s}
+.cl svg{color:var(--ac);flex:none}
+.cl:hover,.cl:focus-visible{transform:translateY(-4px);border-color:var(--ac);box-shadow:0 10px 26px rgba(0,0,0,.35),0 0 18px -4px var(--ac);outline:none}
+.cl span{direction:ltr;unicode-bidi:isolate}
 #veil{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;pointer-events:all}
 #veil div{font-family:'Reem Kufi';font-size:clamp(1.8rem,6vw,3.4rem);color:#fff;text-shadow:0 4px 30px rgba(0,0,0,.4)}
 .rv{opacity:0;animation:rv .8s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:calc(var(--i,0)*90ms)}
@@ -61,7 +68,11 @@ footer{position:relative;text-align:center;color:var(--mu);font-size:.85rem;padd
 </style></head><body>
 <canvas id="fx"></canvas><div id="scene"></div>
 <main><div id="app"><div class="hero"><h1>منصة التطوير الذاتي الشاملة</h1><p>منصة عربية تجمع التحدي الرياضي وحساب السعرات، والتحدي الدراسي لـ 11 تخصصاً، وتحدي تغيير العادات، ومساعداً ذكياً لتطوير الذات.</p></div></div><noscript><p>يلزم تفعيل JavaScript لاستخدام منصة التطوير الذاتي الشاملة.</p></noscript></main>
-<footer>حقوق التطوير محفوظة لـ عبد الله الأحمري</footer>
+<footer class="ft"><div>حقوق التطوير محفوظة لـ عبد الله الأحمري</div>
+<div class="contact"><span class="ct">تواصل معي</span>
+<a class="cl" href="https://mail.google.com/mail/?view=cm&fs=1&to=abdullahalahmari478@gmail.com&su=%D8%B1%D8%B3%D8%A7%D9%84%D8%A9%20%D9%85%D9%86%20%D9%85%D9%86%D8%B5%D8%A9%20%D8%A7%D9%84%D8%AA%D8%B7%D9%88%D9%8A%D8%B1%20%D8%A7%D9%84%D8%B0%D8%A7%D8%AA%D9%8A" target="_blank" rel="noopener" title="أرسل لي رسالة في Gmail" aria-label="راسلني عبر البريد الإلكتروني"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg></a>
+<a class="cl" href="https://x.com/AAlahmari67474" target="_blank" rel="noopener" title="X (تويتر)" aria-label="حسابي في منصة X (تويتر)"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17.8 3h3.1l-6.8 7.7L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.3-8.3L2 3h6.4l4.4 5.8L17.8 3Zm-1.1 16.2h1.7L7.3 4.7H5.5l11.2 14.5Z"/></svg></a>
+<a class="cl" href="https://www.linkedin.com/in/abdullah-alahmari-76046b27a/" target="_blank" rel="noopener" title="LinkedIn" aria-label="حسابي في لينكدإن"><svg viewBox="0 0 24 24" width="21" height="21" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9.75h4V21H3V9.75Zm6.5 0h3.83v1.54h.05c.53-1 1.84-2.04 3.78-2.04 4.04 0 4.79 2.66 4.79 6.12V21h-4v-4.9c0-1.17-.02-2.67-1.63-2.67-1.63 0-1.88 1.27-1.88 2.59V21h-4V9.75Z"/></svg></a></div></footer>
 <div id="veil"><div></div></div>
 <script>
 const $=s=>document.querySelector(s),app=$('#app'),veil=$('#veil');
